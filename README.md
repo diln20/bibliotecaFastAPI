@@ -36,4 +36,4 @@ Este repositorio incluye `.github/workflows/pages.yml` para desplegar automátic
 Repositorio previsto: `diln20/bibliotecaFastAPI`
 Sitio previsto: `https://diln20.github.io/bibliotecaFastAPI/`
 
-Después del primer push, si GitHub Pages todavía no está habilitado en el repositorio, entra a **Settings > Pages** y selecciona **GitHub Actions** como origen de publicación. El workflow se ejecutará nuevamente en cada push a `main`.
+Si GitHub Pages todavía no está habilitado en el repositorio, el workflow omitirá el despliegue sin fallar. Entra a **Settings > Pages** y selecciona **GitHub Actions** como origen de publicación para activar el sitio; a partir de ese momento, el workflow desplegará nuevamente en cada push a `main`.

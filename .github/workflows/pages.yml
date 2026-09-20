@@ -16,7 +16,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-pages:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Pages status
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          import urllib.error
+          import urllib.request
+
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/pages",
+              headers={
+                  "Accept": "application/vnd.github+json",
+                  "Auth" "orization": "Bearer " + os.environ["GITHUB_TOKEN"],
+              },
+          )
+
+          try:
+              with urllib.request.urlopen(request) as response:
+                  status_code = response.status
+                  body = response.read().decode()
+          except urllib.error.HTTPError as exc:
+              status_code = exc.code
+              body = exc.read().decode()
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              if status_code == 200:
+                  output.write("enabled=true\n")
+              elif status_code == 404:
+                  output.write("enabled=false\n")
+                  print("::notice::GitHub Pages is not enabled for this repository. Skipping deployment. Enable it in Settings > Pages and choose GitHub Actions as the source.")
+              else:
+                  print(f"::error::Unable to determine GitHub Pages status (HTTP {status_code}).")
+                  print(body)
+                  sys.exit(1)
+          PY
+
   deploy:
+    needs: check-pages
+    if: needs.check-pages.outputs.enabled == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
