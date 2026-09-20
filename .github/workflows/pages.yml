@@ -32,12 +32,12 @@ jobs:
           import urllib.error
           import urllib.request
 
+          headers = {"Accept": "application/vnd.github+json"}
+          headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
+
           request = urllib.request.Request(
               f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/pages",
-              headers={
-                  "Accept": "application/vnd.github+json",
-                  "Auth" "orization": "Bearer " + os.environ["GITHUB_TOKEN"],
-              },
+              headers=headers,
           )
 
           try:
