@@ -18,6 +18,8 @@ concurrency:
 jobs:
   check-pages:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -64,6 +66,7 @@ jobs:
                       output.write("enabled=false\n")
                       print("::notice::GitHub Pages is not enabled for this repository. Skipping deployment. Enable it in Settings > Pages and choose GitHub Actions as the source.")
               else:
+                  output.write("enabled=false\n")
                   print(f"::error::Unable to determine GitHub Pages status (HTTP {status_code}).")
                   print(body)
                   sys.exit(1)
