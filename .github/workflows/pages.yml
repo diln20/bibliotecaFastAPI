@@ -60,16 +60,10 @@ jobs:
                   response = {}
 
           message = response.get("message")
-          documentation_url = response.get("documentation_url", "")
-
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               if status_code == 200:
                   output.write("enabled=true\n")
-              elif (
-                  status_code == 404
-                  and message == "Not Found"
-                  and "rest/pages/pages#get-a-apiname-pages-site" in documentation_url
-              ):
+              elif status_code == 404 and message == "Not Found":
                   output.write("enabled=false\n")
                   print("::notice::GitHub Pages is not enabled for this repository. Skipping deployment. Enable it in Settings > Pages and choose GitHub Actions as the source.")
               else:
