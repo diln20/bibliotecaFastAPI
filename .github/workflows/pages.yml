@@ -20,7 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: read
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -40,7 +39,7 @@ jobs:
           headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
 
           request = urllib.request.Request(
-              f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/pages",
+              f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}",
               headers=headers,
           )
 
@@ -59,13 +58,13 @@ jobs:
               except json.JSONDecodeError:
                   response = {}
 
-          message = response.get("message")
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               if status_code == 200:
-                  output.write("enabled=true\n")
-              elif status_code == 404 and message == "Not Found":
-                  output.write("enabled=false\n")
-                  print("::notice::GitHub Pages is not enabled for this repository. Skipping deployment. Enable it in Settings > Pages and choose GitHub Actions as the source.")
+                  if response.get("has_pages"):
+                      output.write("enabled=true\n")
+                  else:
+                      output.write("enabled=false\n")
+                      print("::notice::GitHub Pages is not enabled for this repository. Skipping deployment. Enable it in Settings > Pages and choose GitHub Actions as the source.")
               else:
                   print(f"::error::Unable to determine GitHub Pages status (HTTP {status_code}).")
                   print(body)
