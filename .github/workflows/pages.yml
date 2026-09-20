@@ -79,6 +79,9 @@ jobs:
                           else:
                               output.write("enabled=false\n")
                               print("::notice::GitHub Pages is enabled, but it is not configured to publish from GitHub Actions. Select GitHub Actions in Settings > Pages to enable this deployment workflow.")
+                      elif pages_status == 404 and pages_response.get("message") == "Not Found":
+                          output.write("enabled=false\n")
+                          print("::notice::GitHub Pages is not fully configured yet. Skipping deployment until the repository finishes setting up Pages for GitHub Actions.")
                       else:
                           output.write("enabled=false\n")
                           print(f"::error::Unable to read GitHub Pages configuration (HTTP {pages_status}).")
