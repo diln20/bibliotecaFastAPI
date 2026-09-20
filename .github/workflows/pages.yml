@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  pages: read
+  pages: write
   id-token: write
 
 concurrency:
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write
+      pages: read
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
