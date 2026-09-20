@@ -82,12 +82,10 @@ jobs:
                       else:
                           output.write("enabled=false\n")
                           print(f"::error::Unable to read GitHub Pages configuration (HTTP {pages_status}).")
-                          print(pages_body)
                           sys.exit(1)
               else:
                   output.write("enabled=false\n")
                   print(f"::error::Unable to determine repository Pages status (HTTP {repo_status}).")
-                  print(repo_body)
                   sys.exit(1)
           PY
 
