@@ -1,0 +1,853 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FastAPI Academy · PostgreSQL + API REST</title><meta name="description" content="Guía paso a paso de FastAPI con PostgreSQL, SQLAlchemy y Alembic para principiantes."><style>
+:root{--bg:#06101d;--panel:#0b1828;--panel2:#0f2137;--soft:#142b45;--text:#edf5ff;--muted:#92a9c5;--line:#203b58;--green:#20d4a1;--blue:#54a8ff;--yellow:#ffcb46;--side:315px} :root.light{--bg:#f5f8fc;--panel:#fff;--panel2:#f8fbff;--soft:#edf4fb;--text:#102039;--muted:#62758f;--line:#dce6f2;--green:#078b70;--blue:#177dca;--yellow:#9d6b00}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.65}button,input{font:inherit}a{color:inherit}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--side);overflow:auto;padding:20px 17px;background:linear-gradient(180deg,var(--panel),var(--bg));border-right:1px solid var(--line);z-index:20}.brand{display:flex;gap:12px;align-items:center;padding:6px 7px 20px}.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,var(--green),var(--blue));color:#021713;font-weight:900}.brand strong{display:block}.brand small{color:var(--muted)}.search{position:relative}.search input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:10px 42px 10px 11px;outline:none}.search kbd{position:absolute;right:8px;top:8px;border:1px solid var(--line);border-bottom-width:2px;border-radius:7px;padding:1px 5px;color:var(--muted);font-size:10px}.nav-group{margin:16px 0}.nav-label{font-size:10px;letter-spacing:.14em;font-weight:900;color:var(--muted);padding:0 9px 6px}.nav-link{display:flex;gap:9px;text-decoration:none;padding:7px 9px;border-radius:9px;color:var(--muted);font-size:12px}.nav-link span{color:var(--green);font-weight:900;min-width:23px}.nav-link:hover,.nav-link.active{background:var(--soft);color:var(--text)}.progress{border:1px solid var(--line);background:var(--panel2);padding:13px;border-radius:13px;margin-top:18px;font-size:12px}.bar{height:6px;background:var(--soft);border-radius:99px;overflow:hidden;margin:8px 0}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--blue))}.progress small{color:var(--muted)}
+main{margin-left:var(--side)}.top{position:sticky;top:0;z-index:15;display:flex;justify-content:space-between;align-items:center;padding:10px 25px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid rgba(120,160,200,.15)}.top span{color:var(--muted);font-size:12px}.ib{width:38px;height:38px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;cursor:pointer}.mobile{display:none}.hero{min-height:80vh;padding:70px clamp(25px,7vw,95px);display:grid;align-content:center;background:radial-gradient(circle at 90% 12%,rgba(32,212,161,.14),transparent 32%),radial-gradient(circle at 80% 48%,rgba(84,168,255,.1),transparent 28%)}.hero>div{max-width:1100px}.tag{display:inline-block;padding:6px 11px;border:1px solid rgba(32,212,161,.35);background:rgba(32,212,161,.07);color:var(--green);border-radius:99px;font-size:11px;font-weight:900;letter-spacing:.11em}.hero h1{font-size:clamp(44px,7.5vw,88px);line-height:.96;letter-spacing:-.055em;margin:20px 0}.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;color:transparent}.hero p{font-size:20px;color:var(--muted);max-width:780px}.hero-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}.hero-buttons a{padding:11px 16px;border-radius:11px;text-decoration:none;font-weight:850}.hero-buttons .primary{background:var(--green);color:#03251c}.hero-buttons .secondary{background:var(--panel);border:1px solid var(--line)}.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-top:46px;max-width:960px}.flow div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;color:var(--muted);font-size:11px}.flow b{display:block;color:var(--text);font-size:15px}
+.chapter{padding:78px clamp(24px,7vw,95px);border-top:1px solid var(--line);max-width:1450px;margin:auto;scroll-margin-top:64px}.chapter.hide{display:none}.kicker,.eyebrow{color:var(--green);font-size:10px;font-weight:900;letter-spacing:.13em}.title-row{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.chapter h2{font-size:clamp(30px,4vw,50px);letter-spacing:-.035em;line-height:1.06;margin:7px 0}.lead{color:var(--muted);font-size:16px;margin:7px 0 20px}.actions{display:flex;gap:7px}.actions button,.copy,.copy-text,.task{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:8px;padding:7px 9px;cursor:pointer;font-size:11px}.done.on{color:var(--green);border-color:rgba(32,212,161,.45)}.star.on{color:var(--yellow)}.explain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}.explain-grid article{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px;min-height:180px}.explain-grid i{font-style:normal;font-size:23px}.explain-grid h3{font-size:14px;margin:8px 0}.explain-grid p{font-size:12px;color:var(--muted);margin:0}.project,.apply{border:1px solid var(--line);background:var(--panel2);border-radius:17px;padding:20px;margin:17px 0}.project{background:linear-gradient(135deg,rgba(32,212,161,.07),rgba(84,168,255,.06))}.project h3{margin:4px 0 12px}.files{display:flex;gap:7px;flex-wrap:wrap}.files strong{width:100%;color:var(--muted);font-size:10px}.file-pill{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 7px;font:11px ui-monospace,monospace}.tree{border:1px solid var(--line);background:var(--panel);border-radius:14px;overflow:hidden;margin:17px 0}.tree summary{padding:13px 15px;cursor:pointer;font-weight:800}.tree pre{margin:0;padding:16px;border-top:1px solid var(--line);background:var(--bg);color:#b8c9dc;overflow:auto}.apply ol{list-style:none;margin:15px 0 20px;padding:0;display:grid;gap:8px}.apply li{display:flex;gap:10px;color:var(--muted)}.apply li b{display:grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:7px;background:var(--soft);color:var(--green);font-size:11px}.code{border:1px solid #1d3551;border-radius:13px;overflow:hidden;background:#040b13}.code-head{display:flex;justify-content:space-between;align-items:center;background:#0a1625;color:#95aac4;padding:8px 11px;font:11px ui-monospace,monospace;border-bottom:1px solid #1d3551}.code pre{margin:0;padding:16px;overflow:auto;color:#d9e7f6;font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}.route,.check{display:flex;justify-content:space-between;gap:15px;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:13px;padding:15px;margin:13px 0}.route strong{color:var(--blue)}.route p,.check p{color:var(--muted);margin:4px 0 0}.check{display:block}.check strong{color:var(--green)}.activity{position:relative;border:1px solid rgba(255,203,70,.4);background:rgba(255,203,70,.075);border-radius:15px;padding:18px 115px 18px 18px;margin:18px 0}.activity strong{display:block;color:var(--yellow)}.activity span{font-size:9px;color:var(--yellow);font-weight:900;letter-spacing:.12em}.activity p{color:var(--muted);margin-bottom:0}.activity .task{position:absolute;right:14px;top:14px}.task.on{color:var(--yellow)}.back{display:inline-block;margin-top:18px;text-decoration:none;color:var(--muted);font-size:12px}.refs{padding:55px clamp(24px,7vw,95px);background:var(--panel);border-top:1px solid var(--line)}.refs li,.refs p{color:var(--muted)}.refs a{color:var(--blue)}
+@media(max-width:1100px){.explain-grid{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){:root{--side:0px}.sidebar{width:300px;transform:translateX(-100%);transition:.2s}.sidebar.open{transform:translateX(0)}main{margin-left:0}.mobile{display:inline-grid}.top{padding:9px 12px}.hero,.chapter{padding-left:20px;padding-right:20px}.title-row{display:block}.actions{margin-bottom:15px}.explain-grid{grid-template-columns:1fr}.flow{grid-template-columns:repeat(2,1fr)}.activity{padding:60px 18px 18px}.activity .task{left:18px;right:auto}}
+</style></head><body>
+<aside class="sidebar" id="sidebar"><div class="brand"><div class="logo">FA</div><div><strong>FastAPI Academy</strong><small>PostgreSQL · API REST</small></div></div><div class="search"><input id="search" placeholder="Buscar SQL, FK, router..."><kbd>Ctrl K</kbd></div><div class="nav-group"><div class="nav-label">INICIO</div><a class="nav-link" href="#inicio" data-target="inicio"><span>01</span>FastAPI + PostgreSQL desde cero</a></div><div class="nav-group"><div class="nav-label">FUNDAMENTOS</div><a class="nav-link" href="#http-json" data-target="http-json"><span>02</span>API, HTTP y JSON antes del framework</a><a class="nav-link" href="#python-venv" data-target="python-venv"><span>03</span>Python mínimo + entorno virtual</a></div><div class="nav-group"><div class="nav-label">POSTGRESQL</div><a class="nav-link" href="#postgres" data-target="postgres"><span>04</span>PostgreSQL: servidor, base, esquema y tabla</a><a class="nav-link" href="#db-conceptos" data-target="db-conceptos"><span>05</span>Conceptos básicos de base de datos</a><a class="nav-link" href="#sql-ddl" data-target="sql-ddl"><span>06</span>SQL para crear la base y las tablas</a><a class="nav-link" href="#sql-crud" data-target="sql-crud"><span>07</span>CRUD directamente en SQL</a><a class="nav-link" href="#relaciones-join" data-target="relaciones-join"><span>08</span>Relaciones y JOIN</a></div><div class="nav-group"><div class="nav-label">FASTAPI</div><a class="nav-link" href="#instalar-fastapi" data-target="instalar-fastapi"><span>09</span>Instalar FastAPI y el stack del proyecto</a><a class="nav-link" href="#hola" data-target="hola"><span>10</span>Hola Mundo y Swagger</a><a class="nav-link" href="#params" data-target="params"><span>11</span>Path y Query Parameters</a><a class="nav-link" href="#pydantic" data-target="pydantic"><span>12</span>Body y Pydantic</a></div><div class="nav-group"><div class="nav-label">PROYECTO</div><a class="nav-link" href="#estructura" data-target="estructura"><span>13</span>Estructura de carpetas</a></div><div class="nav-group"><div class="nav-label">DATOS + ORM</div><a class="nav-link" href="#conexion" data-target="conexion"><span>14</span>Conexión a PostgreSQL</a><a class="nav-link" href="#sqlalchemy" data-target="sqlalchemy"><span>15</span>Modelos SQLAlchemy 2.x</a><a class="nav-link" href="#alembic" data-target="alembic"><span>16</span>Migraciones con Alembic</a><a class="nav-link" href="#schemas-out" data-target="schemas-out"><span>17</span>Schemas Create, Update y Out</a><a class="nav-link" href="#session" data-target="session"><span>18</span>Session como dependencia</a></div><div class="nav-group"><div class="nav-label">CRUD API</div><a class="nav-link" href="#programas" data-target="programas"><span>19</span>Router de Programas</a><a class="nav-link" href="#create-student" data-target="create-student"><span>20</span>CREATE Estudiante</a><a class="nav-link" href="#read-filter" data-target="read-filter"><span>21</span>READ, filtros y paginación</a><a class="nav-link" href="#update-delete" data-target="update-delete"><span>22</span>PATCH y DELETE</a></div><div class="nav-group"><div class="nav-label">API PROFESIONAL</div><a class="nav-link" href="#errores" data-target="errores"><span>23</span>Status HTTP y errores</a><a class="nav-link" href="#docs-cors" data-target="docs-cors"><span>24</span>Swagger, ReDoc, CORS y .env</a></div><div class="nav-group"><div class="nav-label">CALIDAD</div><a class="nav-link" href="#testing" data-target="testing"><span>25</span>Pruebas básicas</a></div><div class="nav-group"><div class="nav-label">PROYECTO FINAL</div><a class="nav-link" href="#final" data-target="final"><span>26</span>Proyecto final desde cero</a></div><div class="progress"><strong>Progreso <span id="pct">0%</span></strong><div class="bar"><div class="fill" id="fill"></div></div><small id="ptext">0 capítulos completados</small></div></aside>
+<main><div class="top"><div><button class="ib mobile" id="menu">☰</button> <span>Proyecto progresivo · fastapi_estudiantes</span></div><div><button class="ib" id="theme">◐</button><button class="ib" id="clear">⌕</button></div></div>
+<header class="hero"><div><span class="tag">● RUTA COMPLETA PARA PRINCIPIANTES</span><h1>Construye una <em>API REST</em> con FastAPI + PostgreSQL</h1><p>Primero entiende HTTP, SQL, tablas y relaciones. Después conecta FastAPI, Pydantic, SQLAlchemy y Alembic sobre el mismo proyecto.</p><div class="hero-buttons"><a href="#inicio" class="primary">Empezar desde cero →</a><a href="#final" class="secondary">Ver proyecto final</a></div><div class="flow"><div><b>01</b>HTTP + JSON</div><div><b>02</b>PostgreSQL</div><div><b>03</b>SQL</div><div><b>04</b>FastAPI</div><div><b>05</b>ORM + CRUD</div><div><b>06</b>Testing</div></div></div></header>
+<section class="chapter" id="inicio" data-search="fastapi + postgresql desde cero una ruta progresiva para construir una api rest real. no estudiarás ejemplos aislados. cada capítulo modifica el mismo proyecto fastapi_estudiantes hasta convertirlo en una api con datos persistentes. inicio readme.md">
+<div class="kicker">01 · INICIO</div>
+<div class="title-row"><div><h2>FastAPI + PostgreSQL desde cero</h2><p class="lead">Una ruta progresiva para construir una API REST real.</p></div><div class="actions"><button class="done" data-id="inicio">✓ Entendido</button><button class="star" data-id="inicio">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>No estudiarás ejemplos aislados. Cada capítulo modifica el mismo proyecto fastapi_estudiantes hasta convertirlo en una API con datos persistentes.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Piensa en la API como un mostrador: un cliente pide algo, FastAPI entiende la solicitud y PostgreSQL conserva la información.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>Cliente → HTTP → FastAPI → Pydantic → SQLAlchemy → psycopg → PostgreSQL → JSON.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Primero entiende qué dato viaja y dónde se guarda; luego memoriza sintaxis.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 README.md</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── README.md  ← editas ahora</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea la carpeta fastapi_estudiantes.</span></li><li><b>2</b><span>Dentro crea README.md.</span></li><li><b>3</b><span>Escribe que el objetivo será administrar programas y estudiantes mediante una API REST.</span></li><li><b>4</b><span>Conserva esta carpeta durante todo el curso.</span></li></ol><div class="code"><div class="code-head"><span>README.md</span><button class="copy">Copiar</button></div><pre><code># API de estudiantes
+
+Proyecto progresivo con FastAPI y PostgreSQL.
+
+Objetivo: administrar programas y estudiantes mediante una API REST.</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Todavía no existe una URL. La primera aparecerá al crear FastAPI.</p></div><button class="copy-text" data-copy="Todavía no existe una URL. La primera aparecerá al crear FastAPI.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes explicar qué vas a construir y qué papel tendrán FastAPI y PostgreSQL.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Dibuja cómo imaginas el recorrido de POST /estudiantes hasta que una fila queda guardada. Al final del curso vuelve al dibujo y corrígelo.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="http-json" data-search="api, http y json antes del framework entiende el idioma que usará tu api. una api es un contrato para que dos programas se comuniquen. http define cómo se hace la solicitud y json es un formato frecuente para intercambiar datos. fundamentos docs/http_api.md">
+<div class="kicker">02 · FUNDAMENTOS</div>
+<div class="title-row"><div><h2>API, HTTP y JSON antes del framework</h2><p class="lead">Entiende el idioma que usará tu API.</p></div><div class="actions"><button class="done" data-id="http-json">✓ Entendido</button><button class="star" data-id="http-json">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Una API es un contrato para que dos programas se comuniquen. HTTP define cómo se hace la solicitud y JSON es un formato frecuente para intercambiar datos.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>El menú de un restaurante se parece a la documentación de la API: dice qué puedes pedir y qué necesitas enviar.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>Una petición combina método + ruta + parámetros + body. La respuesta combina status HTTP + headers + contenido.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>GET consulta, POST crea, PATCH modifica parcialmente y DELETE elimina. JSON no es una base de datos.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 docs/http_api.md</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+├── README.md
+└── docs/
+    └── http_api.md  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea docs/.</span></li><li><b>2</b><span>Anota las rutas del futuro CRUD.</span></li><li><b>3</b><span>Diferencia método HTTP, URL y body JSON.</span></li><li><b>4</b><span>Escribe qué respuesta esperarías al crear un estudiante.</span></li></ol><div class="code"><div class="code-head"><span>docs/http_api.md</span><button class="copy">Copiar</button></div><pre><code>GET    /estudiantes
+GET    /estudiantes/7
+POST   /estudiantes
+PATCH  /estudiantes/7
+DELETE /estudiantes/7
+
+{
+  &quot;nombre&quot;: &quot;Ana Torres&quot;,
+  &quot;email&quot;: &quot;ana@example.com&quot;,
+  &quot;programa_id&quot;: 1
+}</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Más adelante: http://127.0.0.1:8000/docs</p></div><button class="copy-text" data-copy="Más adelante: http://127.0.0.1:8000/docs">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes explicar por qué GET /estudiantes y POST /estudiantes tienen la misma ruta pero hacen cosas distintas.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Clasifica estas acciones: listar, registrar, cambiar correo, borrar, consultar por id. Asigna un método HTTP a cada una.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="python-venv" data-search="python mínimo + entorno virtual prepara el lenguaje y aísla las dependencias. para empezar necesitas funciones, diccionarios, listas, imports y anotaciones de tipo. el entorno virtual evita mezclar librerías entre proyectos. fundamentos practica_python.py .venv/ .gitignore">
+<div class="kicker">03 · FUNDAMENTOS</div>
+<div class="title-row"><div><h2>Python mínimo + entorno virtual</h2><p class="lead">Prepara el lenguaje y aísla las dependencias.</p></div><div class="actions"><button class="done" data-id="python-venv">✓ Entendido</button><button class="star" data-id="python-venv">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Para empezar necesitas funciones, diccionarios, listas, imports y anotaciones de tipo. El entorno virtual evita mezclar librerías entre proyectos.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Un diccionario Python se parece bastante al JSON. El entorno .venv es una caja de herramientas exclusiva de este proyecto.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>FastAPI aprovecha los tipos de Python para validar. Al activar .venv, python y pip apuntan a ese entorno.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>En PowerShell la activación es .\.venv\Scripts\Activate.ps1; no confundas una l con el número 1.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 practica_python.py</span><span class="file-pill">📄 .venv/</span><span class="file-pill">📄 .gitignore</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+├── .venv/  ← se crea
+├── .gitignore
+├── practica_python.py
+└── README.md</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea una función simple con tipos.</span></li><li><b>2</b><span>Ejecuta python -m venv .venv.</span></li><li><b>3</b><span>Activa el entorno.</span></li><li><b>4</b><span>Agrega .venv/, __pycache__/ y .env al .gitignore.</span></li></ol><div class="code"><div class="code-head"><span>Terminal / practica_python.py</span><button class="copy">Copiar</button></div><pre><code>estudiante = {&quot;nombre&quot;: &quot;Ana&quot;, &quot;edad&quot;: 20}
+
+def presentar(nombre: str, edad: int) -&gt; str:
+    return f&quot;{nombre} tiene {edad} años&quot;
+
+print(presentar(estudiante[&quot;nombre&quot;], estudiante[&quot;edad&quot;]))
+
+# Terminal
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Terminal: python practica_python.py</p></div><button class="copy-text" data-copy="Terminal: python practica_python.py">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>La terminal imprime el mensaje y python -m pip --version apunta a .venv.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Agrega email al diccionario y una función es_mayor_de_edad(edad) que devuelva True o False.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="postgres" data-search="postgresql: servidor, base, esquema y tabla aprende dónde viven realmente los datos. postgresql es un servidor de bases de datos. dentro puede tener varias bases; dentro de una base hay esquemas; dentro de ellos, tablas. postgresql docs/postgresql.md">
+<div class="kicker">04 · POSTGRESQL</div>
+<div class="title-row"><div><h2>PostgreSQL: servidor, base, esquema y tabla</h2><p class="lead">Aprende dónde viven realmente los datos.</p></div><div class="actions"><button class="done" data-id="postgres">✓ Entendido</button><button class="star" data-id="postgres">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>PostgreSQL es un servidor de bases de datos. Dentro puede tener varias bases; dentro de una base hay esquemas; dentro de ellos, tablas.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Servidor = edificio, base = apartamento, tablas = habitaciones y filas = elementos guardados.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>La aplicación se conectará normalmente a localhost:5432 usando usuario, contraseña y nombre de base.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>pgAdmin es interfaz gráfica; psql es terminal. Ambos pueden conectarse al mismo PostgreSQL.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 docs/postgresql.md</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── docs/
+    └── postgresql.md  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Instala PostgreSQL.</span></li><li><b>2</b><span>Conserva la contraseña del usuario postgres.</span></li><li><b>3</b><span>Abre pgAdmin o psql.</span></li><li><b>4</b><span>Ejecuta SELECT version();.</span></li></ol><div class="code"><div class="code-head"><span>psql</span><button class="copy">Copiar</button></div><pre><code>psql -U postgres
+
+SELECT version();
+\l
+\q</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Se prueba en psql o pgAdmin, no en el navegador.</p></div><button class="copy-text" data-copy="Se prueba en psql o pgAdmin, no en el navegador.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>SELECT version(); responde y puedes identificar la lista de bases del servidor.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>En pgAdmin ubica Servers → Databases → Schemas → Tables y explica qué representa cada nivel.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="db-conceptos" data-search="conceptos básicos de base de datos tabla, fila, columna, tipos y restricciones. una tabla representa un tipo de entidad; cada fila es un registro y cada columna una propiedad. las restricciones evitan datos inválidos. postgresql docs/modelo_datos.md">
+<div class="kicker">05 · POSTGRESQL</div>
+<div class="title-row"><div><h2>Conceptos básicos de base de datos</h2><p class="lead">Tabla, fila, columna, tipos y restricciones.</p></div><div class="actions"><button class="done" data-id="db-conceptos">✓ Entendido</button><button class="star" data-id="db-conceptos">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Una tabla representa un tipo de entidad; cada fila es un registro y cada columna una propiedad. Las restricciones evitan datos inválidos.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>En una lista de estudiantes, cada renglón es una persona; id es su identificador interno y email es una propiedad.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>PRIMARY KEY identifica una fila; FOREIGN KEY enlaza otra tabla; UNIQUE evita duplicados; NOT NULL obliga a tener dato.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Una FK guarda una referencia, no una copia completa del registro relacionado.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 docs/modelo_datos.md</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── docs/
+    └── modelo_datos.md  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Dibuja programas(id,nombre).</span></li><li><b>2</b><span>Dibuja estudiantes(id,nombre,email,edad,activo,programa_id).</span></li><li><b>3</b><span>Marca PK y FK.</span></li><li><b>4</b><span>Explica por qué email debería ser UNIQUE.</span></li></ol><div class="code"><div class="code-head"><span>Modelo lógico</span><button class="copy">Copiar</button></div><pre><code>programas
+- id          BIGINT   PK
+- nombre      VARCHAR  UNIQUE NOT NULL
+
+estudiantes
+- id          BIGINT   PK
+- nombre      VARCHAR  NOT NULL
+- email       VARCHAR  UNIQUE NOT NULL
+- edad        INTEGER  NULL
+- activo      BOOLEAN  NOT NULL
+- programa_id BIGINT   FK -&gt; programas.id</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Concepto previo: todavía no hay endpoint.</p></div><button class="copy-text" data-copy="Concepto previo: todavía no hay endpoint.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes señalar cuál tabla es padre y dónde vive la clave foránea.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Diseña una tercera tabla materias en papel. Decide PK, columnas básicas y relación con programas.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="sql-ddl" data-search="sql para crear la base y las tablas aprende ddl antes de usar el orm. conviene saber qué tablas queremos antes de pedirle a sqlalchemy que las represente como clases. postgresql sql/01_crear_bd.sql sql/02_sql_basico.sql">
+<div class="kicker">06 · POSTGRESQL</div>
+<div class="title-row"><div><h2>SQL para crear la base y las tablas</h2><p class="lead">Aprende DDL antes de usar el ORM.</p></div><div class="actions"><button class="done" data-id="sql-ddl">✓ Entendido</button><button class="star" data-id="sql-ddl">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Conviene saber qué tablas queremos antes de pedirle a SQLAlchemy que las represente como clases.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Primero construyes las estanterías; después guardas información.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>CREATE DATABASE crea la base. CREATE TABLE define columnas y restricciones. PostgreSQL hará cumplir las claves y checks.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Crea primero la base, conéctate a ella y luego crea las tablas.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 sql/01_crear_bd.sql</span><span class="file-pill">📄 sql/02_sql_basico.sql</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── sql/
+    ├── 01_crear_bd.sql
+    └── 02_sql_basico.sql</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea fastapi_estudiantes.</span></li><li><b>2</b><span>Conéctate a esa base.</span></li><li><b>3</b><span>Crea programas.</span></li><li><b>4</b><span>Crea estudiantes con FK hacia programas.</span></li><li><b>5</b><span>Revisa las tablas con \dt.</span></li></ol><div class="code"><div class="code-head"><span>SQL</span><button class="copy">Copiar</button></div><pre><code>CREATE DATABASE fastapi_estudiantes;
+
+CREATE TABLE programas (
+  id BIGSERIAL PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE estudiantes (
+  id BIGSERIAL PRIMARY KEY,
+  nombre VARCHAR(120) NOT NULL,
+  email VARCHAR(180) NOT NULL UNIQUE,
+  edad INTEGER CHECK (edad IS NULL OR edad &gt;= 0),
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  programa_id BIGINT NOT NULL REFERENCES programas(id) ON DELETE RESTRICT
+);</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>psql/pgAdmin conectado a fastapi_estudiantes.</p></div><button class="copy-text" data-copy="psql/pgAdmin conectado a fastapi_estudiantes.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>\dt muestra programas y estudiantes.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Intenta insertar un estudiante con programa_id=999 sin crear ese programa. Lee el error y explica qué te protegió.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="sql-crud" data-search="crud directamente en sql insert, select, update y delete. antes del crud http, practica el crud de base de datos. luego podrás reconocer qué operación sql se esconde detrás de cada endpoint. postgresql sql/02_sql_basico.sql">
+<div class="kicker">07 · POSTGRESQL</div>
+<div class="title-row"><div><h2>CRUD directamente en SQL</h2><p class="lead">INSERT, SELECT, UPDATE y DELETE.</p></div><div class="actions"><button class="done" data-id="sql-crud">✓ Entendido</button><button class="star" data-id="sql-crud">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Antes del CRUD HTTP, practica el CRUD de base de datos. Luego podrás reconocer qué operación SQL se esconde detrás de cada endpoint.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>POST se parece a INSERT, GET a SELECT, PATCH a UPDATE y DELETE a DELETE.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>Estas operaciones cambian datos persistentes. WHERE determina qué filas afectan UPDATE y DELETE.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>No ejecutes UPDATE o DELETE sin entender el WHERE.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 sql/02_sql_basico.sql</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── sql/
+    └── 02_sql_basico.sql  ← editas</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Inserta dos programas.</span></li><li><b>2</b><span>Inserta estudiantes con programa_id válido.</span></li><li><b>3</b><span>Consulta todos y luego uno.</span></li><li><b>4</b><span>Actualiza una edad.</span></li><li><b>5</b><span>Elimina un registro de prueba.</span></li></ol><div class="code"><div class="code-head"><span>SQL</span><button class="copy">Copiar</button></div><pre><code>INSERT INTO programas (nombre) VALUES (&#x27;Ingeniería de Sistemas&#x27;);
+
+INSERT INTO estudiantes (nombre,email,edad,programa_id)
+VALUES (&#x27;Ana Torres&#x27;,&#x27;ana@example.com&#x27;,20,1);
+
+SELECT * FROM estudiantes;
+UPDATE estudiantes SET edad=21 WHERE id=1;
+DELETE FROM estudiantes WHERE id=1;</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>psql/pgAdmin.</p></div><button class="copy-text" data-copy="psql/pgAdmin.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes demostrar los cuatro pasos del CRUD y explicar qué método HTTP corresponde a cada uno.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Crea tres estudiantes y escribe un SELECT que devuelva solo activos mayores de edad.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="relaciones-join" data-search="relaciones y join une entidades sin repetir datos. un programa tiene muchos estudiantes y cada estudiante pertenece a un programa: es una relación 1:n. join permite consultar ambos lados juntos. postgresql docs/relaciones.md sql/03_joins.sql">
+<div class="kicker">08 · POSTGRESQL</div>
+<div class="title-row"><div><h2>Relaciones y JOIN</h2><p class="lead">Une entidades sin repetir datos.</p></div><div class="actions"><button class="done" data-id="relaciones-join">✓ Entendido</button><button class="star" data-id="relaciones-join">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Un programa tiene muchos estudiantes y cada estudiante pertenece a un programa: es una relación 1:N. JOIN permite consultar ambos lados juntos.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>En lugar de repetir “Ingeniería de Sistemas” en cada estudiante, guardas el id y unes cuando necesitas mostrar el nombre.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>La FK materializa la relación. INNER JOIN combina filas cuando la condición ON coincide. N:M suele requerir tabla intermedia.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>La cardinalidad describe el negocio; JOIN describe cómo consultar varias tablas.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 docs/relaciones.md</span><span class="file-pill">📄 sql/03_joins.sql</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+├── docs/relaciones.md
+└── sql/03_joins.sql</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Dibuja Programa 1:N Estudiante.</span></li><li><b>2</b><span>Identifica la FK.</span></li><li><b>3</b><span>Escribe un INNER JOIN.</span></li><li><b>4</b><span>Dibuja cómo resolverías Estudiante N:M Materia.</span></li></ol><div class="code"><div class="code-head"><span>SQL JOIN</span><button class="copy">Copiar</button></div><pre><code>SELECT e.id, e.nombre AS estudiante, e.email, p.nombre AS programa
+FROM estudiantes e
+INNER JOIN programas p ON p.id = e.programa_id
+ORDER BY e.id;</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>psql/pgAdmin.</p></div><button class="copy-text" data-copy="psql/pgAdmin.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>El resultado muestra nombre del estudiante y del programa en una misma fila.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Filtra el JOIN para mostrar únicamente estudiantes de un programa concreto.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="instalar-fastapi" data-search="instalar fastapi y el stack del proyecto servidor, orm, driver, migraciones y configuración. ahora instalaremos las piezas de python que exponen datos por http y hablan con postgresql. fastapi requirements.txt">
+<div class="kicker">09 · FASTAPI</div>
+<div class="title-row"><div><h2>Instalar FastAPI y el stack del proyecto</h2><p class="lead">Servidor, ORM, driver, migraciones y configuración.</p></div><div class="actions"><button class="done" data-id="instalar-fastapi">✓ Entendido</button><button class="star" data-id="instalar-fastapi">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Ahora instalaremos las piezas de Python que exponen datos por HTTP y hablan con PostgreSQL.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>FastAPI recibe, Uvicorn sirve, SQLAlchemy organiza consultas, psycopg conecta y Alembic versiona cambios de tablas.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>fastapi[standard] aporta el servidor habitual. SQLAlchemy usa el dialecto PostgreSQL y psycopg como DBAPI.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Instala siempre con el entorno virtual activado.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 requirements.txt</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+├── .venv/
+└── requirements.txt  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Activa .venv.</span></li><li><b>2</b><span>Instala dependencias.</span></li><li><b>3</b><span>Genera requirements.txt.</span></li><li><b>4</b><span>Comprueba imports.</span></li></ol><div class="code"><div class="code-head"><span>Terminal</span><button class="copy">Copiar</button></div><pre><code>python -m pip install &quot;fastapi[standard]&quot; sqlalchemy &quot;psycopg[binary]&quot; alembic pydantic-settings email-validator pytest httpx
+python -m pip freeze &gt; requirements.txt
+python -c &quot;import fastapi, sqlalchemy, psycopg; print(&#x27;OK&#x27;)&quot;</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Terminal dentro de fastapi_estudiantes/.</p></div><button class="copy-text" data-copy="Terminal dentro de fastapi_estudiantes/.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>La última línea imprime OK.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Clasifica cada dependencia como API, servidor, ORM, driver, migraciones, configuración o testing.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="hola" data-search="hola mundo y swagger tu primera respuesta json. una app fastapi comienza con un objeto fastapi y funciones asociadas a rutas mediante decoradores. fastapi app/__init__.py app/main.py">
+<div class="kicker">10 · FASTAPI</div>
+<div class="title-row"><div><h2>Hola Mundo y Swagger</h2><p class="lead">Tu primera respuesta JSON.</p></div><div class="actions"><button class="done" data-id="hola">✓ Entendido</button><button class="star" data-id="hola">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Una app FastAPI comienza con un objeto FastAPI y funciones asociadas a rutas mediante decoradores.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>@app.get(&quot;/&quot;) significa: cuando llegue un GET a /, ejecuta esta función.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>FastAPI convierte el dict de Python a JSON y genera OpenAPI automáticamente.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>main:app significa módulo main.py + objeto app.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/__init__.py</span><span class="file-pill">📄 app/main.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── app/
+    ├── __init__.py
+    └── main.py  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea app/.</span></li><li><b>2</b><span>Crea __init__.py.</span></li><li><b>3</b><span>Crea app/main.py.</span></li><li><b>4</b><span>Ejecuta fastapi dev app/main.py.</span></li><li><b>5</b><span>Abre / y /docs.</span></li></ol><div class="code"><div class="code-head"><span>app/main.py</span><button class="copy">Copiar</button></div><pre><code>from fastapi import FastAPI
+
+app = FastAPI(title=&quot;API de estudiantes&quot;)
+
+@app.get(&quot;/&quot;)
+def inicio():
+    return {&quot;mensaje&quot;: &quot;API funcionando&quot;}
+
+@app.get(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;ok&quot;}</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>http://127.0.0.1:8000/  ·  http://127.0.0.1:8000/docs</p></div><button class="copy-text" data-copy="http://127.0.0.1:8000/  ·  http://127.0.0.1:8000/docs">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>La raíz devuelve JSON y Swagger abre correctamente.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Crea GET /saludo/{nombre} y devuelve el nombre recibido.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="params" data-search="path y query parameters identifica recursos y aplica filtros. el path suele identificar un recurso; el query suele filtrar o modificar cómo se consulta una colección. fastapi app/main.py">
+<div class="kicker">11 · FASTAPI</div>
+<div class="title-row"><div><h2>Path y Query Parameters</h2><p class="lead">Identifica recursos y aplica filtros.</p></div><div class="actions"><button class="done" data-id="params">✓ Entendido</button><button class="star" data-id="params">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>El path suele identificar un recurso; el query suele filtrar o modificar cómo se consulta una colección.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>/estudiantes/7 pide el casillero 7. /estudiantes?activo=true pide una colección filtrada.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>FastAPI convierte tipos usando las anotaciones de Python y responde con error de validación si no puede.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Path: parte de la ruta. Query: aparece después de ?. No cumplen el mismo papel.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/main.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── app/main.py  ← editas</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Agrega /estudiantes/{id}.</span></li><li><b>2</b><span>Prueba id entero y texto.</span></li><li><b>3</b><span>Agrega activo opcional y limit.</span></li><li><b>4</b><span>Observa los controles en /docs.</span></li></ol><div class="code"><div class="code-head"><span>Ejemplo</span><button class="copy">Copiar</button></div><pre><code>@app.get(&quot;/estudiantes/{estudiante_id}&quot;)
+def obtener(estudiante_id: int):
+    return {&quot;id&quot;: estudiante_id}
+
+@app.get(&quot;/estudiantes&quot;)
+def listar(activo: bool | None = None, limit: int = 10):
+    return {&quot;activo&quot;: activo, &quot;limit&quot;: limit}</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>http://127.0.0.1:8000/estudiantes/7  ·  /estudiantes?activo=true&amp;limit=5</p></div><button class="copy-text" data-copy="http://127.0.0.1:8000/estudiantes/7  ·  /estudiantes?activo=true&amp;limit=5">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes explicar qué dato proviene del path y cuál del query.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Agrega buscar: str | None y prueba valores con espacios desde Swagger.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="pydantic" data-search="body y pydantic define el contrato del json. un schema pydantic describe qué campos entran o salen, sus tipos y reglas. no es todavía una tabla de base de datos. fastapi app/schemas.py">
+<div class="kicker">12 · FASTAPI</div>
+<div class="title-row"><div><h2>Body y Pydantic</h2><p class="lead">Define el contrato del JSON.</p></div><div class="actions"><button class="done" data-id="pydantic">✓ Entendido</button><button class="star" data-id="pydantic">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Un schema Pydantic describe qué campos entran o salen, sus tipos y reglas. No es todavía una tabla de base de datos.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Es como un formulario con validaciones antes de permitir que la solicitud llegue a la lógica.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>FastAPI lee el body JSON, Pydantic valida y produce un objeto Python tipado.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Schema valida/intercambia datos; modelo ORM representa una tabla.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/schemas.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── app/
+    └── schemas.py  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea EstudianteCreate.</span></li><li><b>2</b><span>Marca nombre mínimo.</span></li><li><b>3</b><span>Usa EmailStr.</span></li><li><b>4</b><span>Limita edad entre 0 y 120.</span></li><li><b>5</b><span>Prueba un body inválido.</span></li></ol><div class="code"><div class="code-head"><span>app/schemas.py</span><button class="copy">Copiar</button></div><pre><code>from pydantic import BaseModel, EmailStr, Field
+
+class EstudianteCreate(BaseModel):
+    nombre: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    edad: int | None = Field(default=None, ge=0, le=120)
+    programa_id: int</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>POST temporal desde http://127.0.0.1:8000/docs</p></div><button class="copy-text" data-copy="POST temporal desde http://127.0.0.1:8000/docs">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Un email inválido o edad fuera de rango se rechazan antes de tu lógica.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Agrega activo: bool = True y prueba el body sin enviar ese campo.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="estructura" data-search="estructura de carpetas separa responsabilidades sin complicar de más. cuando todo vive en main.py resulta difícil seguir el flujo. separaremos configuración, db, modelos, schemas, dependencias y routers. proyecto app/config.py app/database.py app/models.py app/schemas.py app/dependencies.py app/routers/">
+<div class="kicker">13 · PROYECTO</div>
+<div class="title-row"><div><h2>Estructura de carpetas</h2><p class="lead">Separa responsabilidades sin complicar de más.</p></div><div class="actions"><button class="done" data-id="estructura">✓ Entendido</button><button class="star" data-id="estructura">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Cuando todo vive en main.py resulta difícil seguir el flujo. Separaremos configuración, DB, modelos, schemas, dependencias y routers.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Una cocina organizada separa ingredientes, utensilios y pedidos.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>main arma la app; database configura persistencia; models representa tablas; schemas contratos; routers endpoints.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Una carpeta no es buena arquitectura por sí sola: cada archivo debe tener una responsabilidad clara.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/config.py</span><span class="file-pill">📄 app/database.py</span><span class="file-pill">📄 app/models.py</span><span class="file-pill">📄 app/schemas.py</span><span class="file-pill">📄 app/dependencies.py</span><span class="file-pill">📄 app/routers/</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>app/
+├── main.py
+├── config.py
+├── database.py
+├── models.py
+├── schemas.py
+├── dependencies.py
+└── routers/
+    ├── programas.py
+    └── estudiantes.py</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea los archivos vacíos.</span></li><li><b>2</b><span>Crea routers/__init__.py.</span></li><li><b>3</b><span>No borres schemas.py.</span></li><li><b>4</b><span>Desde aquí las rutas reales vivirán en routers.</span></li></ol><div class="code"><div class="code-head"><span>Estructura objetivo</span><button class="copy">Copiar</button></div><pre><code>app/
+├── __init__.py
+├── main.py
+├── config.py
+├── database.py
+├── models.py
+├── schemas.py
+├── dependencies.py
+└── routers/
+    ├── __init__.py
+    ├── programas.py
+    └── estudiantes.py</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>La API seguirá ejecutándose desde app/main.py.</p></div><button class="copy-text" data-copy="La API seguirá ejecutándose desde app/main.py.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes decir dónde iría una ruta, una clase ORM y la URL de conexión.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Sin mirar la respuesta, ubica mentalmente estos elementos: POST /estudiantes, class Estudiante, DATABASE_URL, EstudianteCreate.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="conexion" data-search="conexión a postgresql settings, engine y session. la url de conexión indica a sqlalchemy el motor y servidor. engine administra conexiones; session representa una unidad de trabajo. datos + orm .env .env.example app/config.py app/database.py">
+<div class="kicker">14 · DATOS + ORM</div>
+<div class="title-row"><div><h2>Conexión a PostgreSQL</h2><p class="lead">Settings, Engine y Session.</p></div><div class="actions"><button class="done" data-id="conexion">✓ Entendido</button><button class="star" data-id="conexion">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>La URL de conexión indica a SQLAlchemy el motor y servidor. Engine administra conexiones; Session representa una unidad de trabajo.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Engine es la central de transporte; Session es un viaje concreto para consultar o guardar.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>Usaremos postgresql+psycopg:// para escoger PostgreSQL + psycopg 3. La contraseña se lee desde .env.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>No subas .env. Sí sube .env.example sin secretos reales.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 .env</span><span class="file-pill">📄 .env.example</span><span class="file-pill">📄 app/config.py</span><span class="file-pill">📄 app/database.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+├── .env  ← local
+├── .env.example
+└── app/
+    ├── config.py
+    └── database.py</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea .env.example.</span></li><li><b>2</b><span>Copia a .env y coloca tu contraseña.</span></li><li><b>3</b><span>Crea Settings.</span></li><li><b>4</b><span>Crea Engine.</span></li><li><b>5</b><span>Crea SessionLocal.</span></li></ol><div class="code"><div class="code-head"><span>app/config.py + database.py</span><button class="copy">Copiar</button></div><pre><code>DATABASE_URL=postgresql+psycopg://postgres:TU_PASSWORD@localhost:5432/fastapi_estudiantes
+
+# database.py
+engine = create_engine(settings.database_url)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Es configuración interna; aún no añade un endpoint.</p></div><button class="copy-text" data-copy="Es configuración interna; aún no añade un endpoint.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes explicar usuario, contraseña, host, puerto y nombre de base dentro de DATABASE_URL.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Cambia temporalmente el nombre de base por uno inexistente, intenta una consulta, lee el error y luego revierte.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="sqlalchemy" data-search="modelos sqlalchemy 2.x convierte tablas en clases python. el orm permite trabajar con objetos python que representan filas. no elimina sql: genera y ejecuta sql a partir de expresiones. datos + orm app/models.py">
+<div class="kicker">15 · DATOS + ORM</div>
+<div class="title-row"><div><h2>Modelos SQLAlchemy 2.x</h2><p class="lead">Convierte tablas en clases Python.</p></div><div class="actions"><button class="done" data-id="sqlalchemy">✓ Entendido</button><button class="star" data-id="sqlalchemy">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>El ORM permite trabajar con objetos Python que representan filas. No elimina SQL: genera y ejecuta SQL a partir de expresiones.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>En vez de escribir un INSERT manual, creas Estudiante(...) y lo agregas a una Session.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>__tablename__ fija la tabla; mapped_column define columnas; ForeignKey define relación física; relationship ayuda a navegar objetos.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>ForeignKey existe en PostgreSQL. relationship es una herramienta del ORM.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/models.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── app/
+    └── models.py  ← editas</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Define Programa.</span></li><li><b>2</b><span>Define Estudiante.</span></li><li><b>3</b><span>Agrega programa_id como FK.</span></li><li><b>4</b><span>Agrega relationship en ambos lados.</span></li><li><b>5</b><span>Relaciona cada propiedad con la tabla SQL del capítulo 6.</span></li></ol><div class="code"><div class="code-head"><span>app/models.py</span><button class="copy">Copiar</button></div><pre><code>from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database import Base
+
+
+class Programa(Base):
+    __tablename__ = &quot;programas&quot;
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nombre: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
+
+    estudiantes: Mapped[list[&quot;Estudiante&quot;]] = relationship(back_populates=&quot;programa&quot;)
+
+
+class Estudiante(Base):
+    __tablename__ = &quot;estudiantes&quot;
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nombre: Mapped[str] = mapped_column(String(120), index=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(180), unique=True, index=True, nullable=False)
+    edad: Mapped[int | None] = mapped_column(nullable=True)
+    activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    programa_id: Mapped[int] = mapped_column(
+        ForeignKey(&quot;programas.id&quot;, ondelete=&quot;RESTRICT&quot;), index=True, nullable=False
+    )
+
+    programa: Mapped[Programa] = relationship(back_populates=&quot;estudiantes&quot;)</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Modelo interno; las tablas se crearán mediante migración.</p></div><button class="copy-text" data-copy="Modelo interno; las tablas se crearán mediante migración.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes señalar la línea de PK, la FK y la relationship.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Agrega en papel una entidad Materia con SQLAlchemy; no la ejecutes todavía.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="alembic" data-search="migraciones con alembic versiona cambios del esquema. las migraciones dejan un historial reproducible de cómo cambió la estructura de la base. datos + orm alembic.ini alembic/env.py alembic/versions/">
+<div class="kicker">16 · DATOS + ORM</div>
+<div class="title-row"><div><h2>Migraciones con Alembic</h2><p class="lead">Versiona cambios del esquema.</p></div><div class="actions"><button class="done" data-id="alembic">✓ Entendido</button><button class="star" data-id="alembic">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Las migraciones dejan un historial reproducible de cómo cambió la estructura de la base.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Es un Git especializado en cambios de tablas.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>Alembic puede comparar Base.metadata con PostgreSQL y generar una propuesta de upgrade/downgrade.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>--autogenerate ayuda, pero siempre revisa el archivo antes de aplicarlo.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 alembic.ini</span><span class="file-pill">📄 alembic/env.py</span><span class="file-pill">📄 alembic/versions/</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+├── alembic.ini
+└── alembic/
+    ├── env.py
+    └── versions/</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Ejecuta alembic init alembic si partes de cero.</span></li><li><b>2</b><span>Configura target_metadata = Base.metadata.</span></li><li><b>3</b><span>Lee DATABASE_URL desde Settings.</span></li><li><b>4</b><span>Genera una revisión.</span></li><li><b>5</b><span>Ejecuta upgrade head.</span></li></ol><div class="code"><div class="code-head"><span>Terminal</span><button class="copy">Copiar</button></div><pre><code>alembic revision --autogenerate -m &quot;crear programas y estudiantes&quot;
+alembic upgrade head
+alembic current</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Terminal: alembic current</p></div><button class="copy-text" data-copy="Terminal: alembic current">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>alembic current muestra la revisión y PostgreSQL contiene las tablas reales.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Agrega telefono opcional al modelo, genera otra migración y revisa el ALTER TABLE generado.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="schemas-out" data-search="schemas create, update y out no uses el mismo contrato para todo. al crear no envías id; al actualizar puedes enviar pocos campos; al responder aparece id. por eso conviene separar schemas. datos + orm app/schemas.py">
+<div class="kicker">17 · DATOS + ORM</div>
+<div class="title-row"><div><h2>Schemas Create, Update y Out</h2><p class="lead">No uses el mismo contrato para todo.</p></div><div class="actions"><button class="done" data-id="schemas-out">✓ Entendido</button><button class="star" data-id="schemas-out">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Al crear no envías id; al actualizar puedes enviar pocos campos; al responder aparece id. Por eso conviene separar schemas.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>El formulario de registro no pide el identificador interno que la base generará.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>ConfigDict(from_attributes=True) deja que Pydantic construya respuestas leyendo atributos de objetos ORM.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Create ≠ Update ≠ Out.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/schemas.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── app/schemas.py  ← amplías</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea ProgramaCreate/Out.</span></li><li><b>2</b><span>Crea EstudianteCreate.</span></li><li><b>3</b><span>Crea EstudianteUpdate con campos opcionales.</span></li><li><b>4</b><span>Crea EstudianteOut.</span></li><li><b>5</b><span>Agrega EstudianteDetalle con programa anidado.</span></li></ol><div class="code"><div class="code-head"><span>app/schemas.py</span><button class="copy">Copiar</button></div><pre><code>from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+
+class ProgramaCreate(BaseModel):
+    nombre: str = Field(min_length=2, max_length=100)
+
+
+class ProgramaOut(ProgramaCreate):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EstudianteCreate(BaseModel):
+    nombre: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    edad: int | None = Field(default=None, ge=0, le=120)
+    programa_id: int
+    activo: bool = True
+
+
+class EstudianteUpdate(BaseModel):
+    nombre: str | None = Field(default=None, min_length=2, max_length=120)
+    email: EmailStr | None = None
+    edad: int | None = Field(default=None, ge=0, le=120)
+    programa_id: int | None = None
+    activo: bool | None = None
+
+
+class EstudianteOut(BaseModel):
+    id: int
+    nombre: str
+    email: EmailStr
+    edad: int | None
+    programa_id: int
+    activo: bool
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EstudianteDetalle(EstudianteOut):
+    programa: ProgramaOut</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Los schemas aparecerán luego dentro de /docs.</p></div><button class="copy-text" data-copy="Los schemas aparecerán luego dentro de /docs.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes explicar por qué EstudianteUpdate usa muchos None y EstudianteOut tiene id.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Diseña MateriaCreate, MateriaUpdate y MateriaOut sin mirar los schemas existentes.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="session" data-search="session como dependencia abre y cierra el acceso a db por petición. los endpoints necesitan una session. fastapi puede inyectarla para no repetir el mismo código en todas las rutas. datos + orm app/dependencies.py">
+<div class="kicker">18 · DATOS + ORM</div>
+<div class="title-row"><div><h2>Session como dependencia</h2><p class="lead">Abre y cierra el acceso a DB por petición.</p></div><div class="actions"><button class="done" data-id="session">✓ Entendido</button><button class="star" data-id="session">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Los endpoints necesitan una Session. FastAPI puede inyectarla para no repetir el mismo código en todas las rutas.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Pides prestada una sesión para una tarea y la devuelves al terminar.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>yield entrega la Session al endpoint y finally garantiza close() incluso si falla la petición.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>La Session no es PostgreSQL; es la unidad de trabajo que conversa con el Engine.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/dependencies.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── app/dependencies.py  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea get_db().</span></li><li><b>2</b><span>Abre SessionLocal().</span></li><li><b>3</b><span>Haz yield db.</span></li><li><b>4</b><span>Cierra en finally.</span></li><li><b>5</b><span>Define DbSession con Annotated y Depends.</span></li></ol><div class="code"><div class="code-head"><span>app/dependencies.py</span><button class="copy">Copiar</button></div><pre><code>from typing import Annotated, Generator
+
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.database import SessionLocal
+
+
+def get_db() -&gt; Generator[Session, None, None]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+DbSession = Annotated[Session, Depends(get_db)]</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Dependencia interna, usada por routers.</p></div><button class="copy-text" data-copy="Dependencia interna, usada por routers.">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes justificar por qué close() va en finally.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Escribe qué podría pasar en un servidor con miles de peticiones si nunca cierras sesiones.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="programas" data-search="router de programas primer crud conectado a la base real. post ya insertará datos reales y get consultará postgresql mediante sqlalchemy. crud api app/routers/programas.py app/main.py">
+<div class="kicker">19 · CRUD API</div>
+<div class="title-row"><div><h2>Router de Programas</h2><p class="lead">Primer CRUD conectado a la base real.</p></div><div class="actions"><button class="done" data-id="programas">✓ Entendido</button><button class="star" data-id="programas">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>POST ya insertará datos reales y GET consultará PostgreSQL mediante SQLAlchemy.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Ahora el mostrador queda conectado al almacén.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>db.add prepara; commit confirma; refresh recupera valores generados como id. select() construye consultas.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>response_model define lo que sale; ProgramaCreate define lo que entra.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/routers/programas.py</span><span class="file-pill">📄 app/main.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>app/
+├── main.py  ← incluye router
+└── routers/
+    └── programas.py  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea APIRouter con prefix=/programas.</span></li><li><b>2</b><span>Implementa POST.</span></li><li><b>3</b><span>Evita nombre duplicado.</span></li><li><b>4</b><span>Implementa GET lista y GET id.</span></li><li><b>5</b><span>Incluye el router en main.py.</span></li></ol><div class="code"><div class="code-head"><span>app/routers/programas.py</span><button class="copy">Copiar</button></div><pre><code>from fastapi import APIRouter, HTTPException, Response, status
+from sqlalchemy import func, select
+
+from app import models, schemas
+from app.dependencies import DbSession
+
+
+router = APIRouter(prefix=&quot;/programas&quot;, tags=[&quot;Programas&quot;])
+
+
+@router.post(&quot;&quot;, response_model=schemas.ProgramaOut, status_code=status.HTTP_201_CREATED)
+def crear_programa(datos: schemas.ProgramaCreate, db: DbSession):
+    existe = db.scalar(select(models.Programa).where(models.Programa.nombre == datos.nombre))
+    if existe:
+        raise HTTPException(status.HTTP_409_CONFLICT, &quot;Ya existe un programa con ese nombre&quot;)
+
+    programa = models.Programa(**datos.model_dump())
+    db.add(programa)
+    db.commit()
+    db.refresh(programa)
+    return programa
+
+
+@router.get(&quot;&quot;, response_model=list[schemas.ProgramaOut])
+def listar_programas(db: DbSession):
+    stmt = select(models.Programa).order_by(models.Programa.id)
+    return list(db.scalars(stmt).all())
+
+
+@router.get(&quot;/{programa_id}&quot;, response_model=schemas.ProgramaOut)
+def obtener_programa(programa_id: int, db: DbSession):
+    programa = db.get(models.Programa, programa_id)
+    if not programa:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, &quot;Programa no encontrado&quot;)
+    return programa
+
+
+@router.delete(&quot;/{programa_id}&quot;, status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_programa(programa_id: int, db: DbSession):
+    programa = db.get(models.Programa, programa_id)
+    if not programa:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, &quot;Programa no encontrado&quot;)
+
+    total = db.scalar(
+        select(func.count()).select_from(models.Estudiante).where(
+            models.Estudiante.programa_id == programa_id
+        )
+    )
+    if total:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            &quot;No se puede eliminar: el programa tiene estudiantes asociados&quot;,
+        )
+
+    db.delete(programa)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>POST/GET http://127.0.0.1:8000/programas</p></div><button class="copy-text" data-copy="POST/GET http://127.0.0.1:8000/programas">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Crear devuelve 201 e id; consultar inexistente devuelve 404.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Prueba borrar un programa con estudiantes asociados y explica por qué debería fallar.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="create-student" data-search="create estudiante valida programa y email antes de insertar. para registrar un estudiante primero comprobamos que el programa exista y que el email no pertenezca a otra persona. crud api app/routers/estudiantes.py">
+<div class="kicker">20 · CRUD API</div>
+<div class="title-row"><div><h2>CREATE Estudiante</h2><p class="lead">Valida programa y email antes de insertar.</p></div><div class="actions"><button class="done" data-id="create-student">✓ Entendido</button><button class="star" data-id="create-student">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Para registrar un estudiante primero comprobamos que el programa exista y que el email no pertenezca a otra persona.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>La base protege restricciones, pero una validación previa permite respuestas HTTP más claras.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>SELECT verifica reglas; luego construimos Estudiante, hacemos add, commit y refresh.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>La API valida para ayudar al cliente; PostgreSQL sigue siendo la última defensa de integridad.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/routers/estudiantes.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>app/routers/
+└── estudiantes.py  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea router /estudiantes.</span></li><li><b>2</b><span>Valida programa_id.</span></li><li><b>3</b><span>Busca email duplicado.</span></li><li><b>4</b><span>Crea objeto ORM.</span></li><li><b>5</b><span>Confirma la transacción.</span></li></ol><div class="code"><div class="code-head"><span>POST principal</span><button class="copy">Copiar</button></div><pre><code>@router.post(&quot;&quot;, response_model=schemas.EstudianteOut, status_code=201)
+def crear_estudiante(datos: schemas.EstudianteCreate, db: DbSession):
+    _validar_programa(db, datos.programa_id)
+    if _email_en_uso(db, str(datos.email)):
+        raise HTTPException(409, &quot;El email ya está registrado&quot;)
+    estudiante = models.Estudiante(**datos.model_dump())
+    db.add(estudiante)
+    db.commit()
+    db.refresh(estudiante)
+    return estudiante</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>POST http://127.0.0.1:8000/estudiantes</p></div><button class="copy-text" data-copy="POST http://127.0.0.1:8000/estudiantes">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Programa inexistente → 404; email repetido → 409; body válido → 201.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Intenta crear dos estudiantes con el mismo email y compara el comportamiento de la API con la restricción UNIQUE.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="read-filter" data-search="read, filtros y paginación consulta uno o muchos sin traer todo. listar devuelve una colección. consultar por id devuelve un recurso. los query params permiten filtrar y paginar. crud api app/routers/estudiantes.py">
+<div class="kicker">21 · CRUD API</div>
+<div class="title-row"><div><h2>READ, filtros y paginación</h2><p class="lead">Consulta uno o muchos sin traer todo.</p></div><div class="actions"><button class="done" data-id="read-filter">✓ Entendido</button><button class="star" data-id="read-filter">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Listar devuelve una colección. Consultar por id devuelve un recurso. Los query params permiten filtrar y paginar.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Es como un catálogo: puedes abrir el libro #7 o buscar solo activos del programa 1.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>La sentencia select se construye condicionalmente y PostgreSQL ejecuta WHERE, ORDER BY, OFFSET y LIMIT.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Paginar en la base es mejor que cargar miles de filas y cortar en Python.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/routers/estudiantes.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>app/routers/
+└── estudiantes.py  ← amplías</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Implementa GET lista.</span></li><li><b>2</b><span>Agrega skip/limit.</span></li><li><b>3</b><span>Filtra activo y programa_id.</span></li><li><b>4</b><span>Agrega buscar con ilike.</span></li><li><b>5</b><span>Agrega edad_minima.</span></li><li><b>6</b><span>Implementa GET /{id}.</span></li></ol><div class="code"><div class="code-head"><span>Listar con filtros</span><button class="copy">Copiar</button></div><pre><code>GET /estudiantes?activo=true&amp;programa_id=1&amp;buscar=ana&amp;edad_minima=18&amp;limit=20</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>http://127.0.0.1:8000/estudiantes?buscar=ana&amp;limit=5</p></div><button class="copy-text" data-copy="http://127.0.0.1:8000/estudiantes?buscar=ana&amp;limit=5">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Una lista sin resultados devuelve []; un id inexistente devuelve 404.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Agrega un filtro edad_maxima y revisa que se combine correctamente con edad_minima.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="update-delete" data-search="patch y delete modifica parcialmente y elimina con seguridad. patch permite enviar solo lo que cambia. delete elimina si el recurso existe. crud api app/routers/estudiantes.py">
+<div class="kicker">22 · CRUD API</div>
+<div class="title-row"><div><h2>PATCH y DELETE</h2><p class="lead">Modifica parcialmente y elimina con seguridad.</p></div><div class="actions"><button class="done" data-id="update-delete">✓ Entendido</button><button class="star" data-id="update-delete">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>PATCH permite enviar solo lo que cambia. DELETE elimina si el recurso existe.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Si solo cambió el correo, no obligues al cliente a reenviar nombre y edad.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>model_dump(exclude_unset=True) detecta campos realmente enviados. setattr aplica los cambios al ORM.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Si cambia email o programa_id, valida de nuevo las reglas.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/routers/estudiantes.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>app/routers/
+└── estudiantes.py  ← completas CRUD</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Carga el estudiante.</span></li><li><b>2</b><span>Obtén cambios con exclude_unset.</span></li><li><b>3</b><span>Valida nueva FK.</span></li><li><b>4</b><span>Valida email nuevo.</span></li><li><b>5</b><span>Haz commit/refresh.</span></li><li><b>6</b><span>Implementa DELETE y 204.</span></li></ol><div class="code"><div class="code-head"><span>PATCH / DELETE</span><button class="copy">Copiar</button></div><pre><code>PATCH /estudiantes/7
+{
+  &quot;email&quot;: &quot;nuevo@example.com&quot;,
+  &quot;activo&quot;: false
+}
+
+DELETE /estudiantes/7</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>PATCH/DELETE http://127.0.0.1:8000/estudiantes/{id}</p></div><button class="copy-text" data-copy="PATCH/DELETE http://127.0.0.1:8000/estudiantes/{id}">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>PATCH conserva campos no enviados; DELETE responde 204 y luego GET da 404.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Implementa una regla: no permitir eliminar un estudiante inactivo hasta que justifiques si esa regla tiene sentido o no.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="errores" data-search="status http y errores responde de forma predecible. el json explica el problema y el status http permite que otros programas entiendan el resultado de forma estándar. api profesional app/routers/programas.py app/routers/estudiantes.py">
+<div class="kicker">23 · API PROFESIONAL</div>
+<div class="title-row"><div><h2>Status HTTP y errores</h2><p class="lead">Responde de forma predecible.</p></div><div class="actions"><button class="done" data-id="errores">✓ Entendido</button><button class="star" data-id="errores">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>El JSON explica el problema y el status HTTP permite que otros programas entiendan el resultado de forma estándar.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>No es igual “no existe” que “ya existe” o “el body está mal formado”.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>HTTPException se convierte en una respuesta con status y detail. Pydantic genera errores de validación.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Usaremos 200, 201, 204, 404, 409 y 422 como casos básicos.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/routers/programas.py</span><span class="file-pill">📄 app/routers/estudiantes.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>app/routers/
+├── programas.py
+└── estudiantes.py</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Revisa status de cada endpoint.</span></li><li><b>2</b><span>201 al crear.</span></li><li><b>3</b><span>404 para recurso inexistente.</span></li><li><b>4</b><span>409 para conflicto de unicidad o relación.</span></li><li><b>5</b><span>204 al borrar sin contenido.</span></li><li><b>6</b><span>Observa 422 en validaciones.</span></li></ol><div class="code"><div class="code-head"><span>Ejemplo</span><button class="copy">Copiar</button></div><pre><code>if existe:
+    raise HTTPException(
+        status_code=409,
+        detail=&quot;El email ya está registrado&quot;
+    )</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>http://127.0.0.1:8000/docs</p></div><button class="copy-text" data-copy="http://127.0.0.1:8000/docs">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes provocar y explicar un 201, 404, 409 y 422.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Escribe un escenario para 400, 401, 403, 404, 409 y 422. Luego investiga la diferencia conceptual entre 401 y 403.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="docs-cors" data-search="swagger, redoc, cors y .env documenta y prepara integración con frontend. fastapi genera openapi a partir de rutas y schemas. cors controla qué orígenes del navegador pueden consumir la api. .env mantiene configuración fuera del código. api profesional app/main.py .env.example">
+<div class="kicker">24 · API PROFESIONAL</div>
+<div class="title-row"><div><h2>Swagger, ReDoc, CORS y .env</h2><p class="lead">Documenta y prepara integración con frontend.</p></div><div class="actions"><button class="done" data-id="docs-cors">✓ Entendido</button><button class="star" data-id="docs-cors">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>FastAPI genera OpenAPI a partir de rutas y schemas. CORS controla qué orígenes del navegador pueden consumir la API. .env mantiene configuración fuera del código.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Swagger es un manual interactivo; CORS es la lista de sitios Web autorizados para llamar desde el navegador.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>Tags, response_model y tipos alimentan OpenAPI. CORSMiddleware añade headers. Settings lee variables del entorno.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>No uses secretos reales en Git. En producción evita allow_origins=[&quot;*&quot;] si conoces los orígenes permitidos.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 app/main.py</span><span class="file-pill">📄 .env.example</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+├── .env.example
+└── app/main.py  ← configuras</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Agrega title/version/description.</span></li><li><b>2</b><span>Incluye routers con tags.</span></li><li><b>3</b><span>Configura CORSMiddleware.</span></li><li><b>4</b><span>Abre /docs, /redoc y /openapi.json.</span></li><li><b>5</b><span>Comprueba que .env está ignorado.</span></li></ol><div class="code"><div class="code-head"><span>app/main.py</span><button class="copy">Copiar</button></div><pre><code>from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.routers import estudiantes, programas
+
+
+app = FastAPI(
+    title=&quot;API de Estudiantes&quot;,
+    version=&quot;1.0.0&quot;,
+    description=&quot;API educativa construida con FastAPI, SQLAlchemy y PostgreSQL.&quot;,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[&quot;http://localhost:5500&quot;, &quot;http://localhost:4200&quot;],
+    allow_credentials=True,
+    allow_methods=[&quot;*&quot;],
+    allow_headers=[&quot;*&quot;],
+)
+
+app.include_router(programas.router)
+app.include_router(estudiantes.router)
+
+
+@app.get(&quot;/&quot;)
+def inicio():
+    return {&quot;mensaje&quot;: &quot;API funcionando&quot;}
+
+
+@app.get(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;ok&quot;}</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>http://127.0.0.1:8000/docs  ·  /redoc  ·  /openapi.json</p></div><button class="copy-text" data-copy="http://127.0.0.1:8000/docs  ·  /redoc  ·  /openapi.json">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Swagger separa Programas y Estudiantes y muestra schemas correctos.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Consume GET /health desde un HTML en localhost:5500 y luego cambia el origen para observar el efecto de CORS.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="testing" data-search="pruebas básicas comprueba automáticamente lo que no debe romperse. una prueba ejecuta una petición y verifica el status y el contenido esperado. empieza simple y luego aísla una base específica de testing. calidad tests/test_main.py">
+<div class="kicker">25 · CALIDAD</div>
+<div class="title-row"><div><h2>Pruebas básicas</h2><p class="lead">Comprueba automáticamente lo que no debe romperse.</p></div><div class="actions"><button class="done" data-id="testing">✓ Entendido</button><button class="star" data-id="testing">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>Una prueba ejecuta una petición y verifica el status y el contenido esperado. Empieza simple y luego aísla una base específica de testing.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Es una lista de comprobación que la computadora repite después de cada cambio.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>TestClient llama a la aplicación ASGI. pytest descubre funciones test_*. Los endpoints CRUD requieren estrategia de base de pruebas.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>No ejecutes pruebas destructivas contra tu base real.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 tests/test_main.py</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>fastapi_estudiantes/
+└── tests/
+    └── test_main.py  ← nuevo</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea tests/.</span></li><li><b>2</b><span>Prueba GET /.</span></li><li><b>3</b><span>Prueba GET /health.</span></li><li><b>4</b><span>Ejecuta pytest -q.</span></li><li><b>5</b><span>Después aprende dependency overrides para CRUD.</span></li></ol><div class="code"><div class="code-head"><span>tests/test_main.py</span><button class="copy">Copiar</button></div><pre><code>import os
+
+os.environ.setdefault(
+    &quot;DATABASE_URL&quot;,
+    &quot;postgresql+psycopg://postgres:postgres@localhost:5432/fastapi_estudiantes&quot;,
+)
+
+from fastapi.testclient import TestClient
+from app.main import app
+
+
+client = TestClient(app)
+
+
+def test_inicio():
+    response = client.get(&quot;/&quot;)
+    assert response.status_code == 200
+    assert response.json()[&quot;mensaje&quot;] == &quot;API funcionando&quot;
+
+
+def test_health():
+    response = client.get(&quot;/health&quot;)
+    assert response.status_code == 200
+    assert response.json() == {&quot;status&quot;: &quot;ok&quot;}</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>Terminal: pytest -q</p></div><button class="copy-text" data-copy="Terminal: pytest -q">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Las pruebas básicas pasan sin necesidad de consultar tablas.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Diseña tres casos de prueba para POST /estudiantes: válido, programa inexistente y email duplicado.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<section class="chapter" id="final" data-search="proyecto final desde cero reconstruye todo sin saltos. la prueba final es poder repetir el proceso en una carpeta vacía y explicar el flujo completo. proyecto final proyecto_final/">
+<div class="kicker">26 · PROYECTO FINAL</div>
+<div class="title-row"><div><h2>Proyecto final desde cero</h2><p class="lead">Reconstruye todo sin saltos.</p></div><div class="actions"><button class="done" data-id="final">✓ Entendido</button><button class="star" data-id="final">☆</button></div></div>
+<div class="explain-grid">
+<article><i>🙂</i><h3>En palabras simples</h3><p>La prueba final es poder repetir el proceso en una carpeta vacía y explicar el flujo completo.</p></article>
+<article><i>🏠</i><h3>Ejemplo cotidiano</h3><p>Ya no se trata de copiar; se trata de saber qué pieza necesitas y por qué.</p></article>
+<article><i>⚙️</i><h3>¿Qué pasa por detrás?</h3><p>HTTP → router → schema → Session → ORM → PostgreSQL → response model.</p></article>
+<article><i>🧠</i><h3>Qué debes recordar</h3><p>Si no puedes explicar dónde se valida o dónde se guarda un dato, repasa esa sección.</p></article>
+</div>
+<div class="project"><div class="eyebrow">🧩 APLICACIÓN DETALLADA AL MISMO PROYECTO</div><h3>Aprende → aplica → comprueba</h3><div class="files"><strong>📍 ARCHIVO(S) EXACTO(S)</strong><span class="file-pill">📄 proyecto_final/</span></div></div>
+<details class="tree" open><summary>▾ Explorador del proyecto <code>fastapi_estudiantes/</code></summary><pre>proyecto_final/
+├── app/
+├── alembic/
+├── sql/
+├── tests/
+├── .env.example
+├── alembic.ini
+├── requirements.txt
+└── README.md</pre></details>
+<div class="apply"><div class="eyebrow">👣 APLÍCALO PASO A PASO</div><ol><li><b>1</b><span>Crea una base limpia.</span></li><li><b>2</b><span>Prepara .venv y dependencias.</span></li><li><b>3</b><span>Configura .env.</span></li><li><b>4</b><span>Define modelos y schemas.</span></li><li><b>5</b><span>Genera migración.</span></li><li><b>6</b><span>Implementa routers.</span></li><li><b>7</b><span>Prueba CRUD en Swagger.</span></li><li><b>8</b><span>Ejecuta tests.</span></li><li><b>9</b><span>Documenta instalación.</span></li></ol><div class="code"><div class="code-head"><span>Checklist final</span><button class="copy">Copiar</button></div><pre><code>fastapi dev app/main.py
+pytest -q
+alembic current
+
+POST /programas
+POST /estudiantes
+GET /estudiantes
+PATCH /estudiantes/{id}
+DELETE /estudiantes/{id}</code></pre></div></div>
+<div class="route"><div><strong>🌐 / ⌨️ CÓMO PROBAR</strong><p>http://127.0.0.1:8000/docs</p></div><button class="copy-text" data-copy="http://127.0.0.1:8000/docs">Copiar</button></div>
+<div class="check"><strong>✅ COMPROBACIÓN · ¿Cómo sé que entendí?</strong><p>Puedes instalar y ejecutar el proyecto usando únicamente README.md y todas las operaciones principales funcionan.</p></div>
+<div class="activity"><strong>🌟 ACTIVIDAD COMPLEMENTARIA</strong><span>🟡 PARA REFORZAR LA LECCIÓN</span><p>Extiende con Materias y una relación muchos-a-muchos Estudiante–Materia: diseña primero SQL, luego modelo ORM, migración, schemas y endpoints.</p><button class="task">○ Pendiente</button></div>
+<a class="back" href="#inicio">↑ Volver al inicio</a>
+</section>
+<footer class="refs"><h2>Referencias oficiales</h2><p>La guía usa como base la documentación vigente de las herramientas principales.</p><ul><li><a href="https://fastapi.tiangolo.com/tutorial/" target="_blank">FastAPI Tutorial</a></li><li><a href="https://fastapi.tiangolo.com/tutorial/sql-databases/" target="_blank">FastAPI · SQL Databases</a></li><li><a href="https://docs.sqlalchemy.org/en/20/orm/" target="_blank">SQLAlchemy ORM</a></li><li><a href="https://docs.sqlalchemy.org/en/20/dialects/postgresql.html" target="_blank">SQLAlchemy PostgreSQL</a></li><li><a href="https://alembic.sqlalchemy.org/en/latest/tutorial.html" target="_blank">Alembic Tutorial</a></li><li><a href="https://www.postgresql.org/docs/current/" target="_blank">PostgreSQL Documentation</a></li></ul></footer></main>
+<script>
+const chapters=[...document.querySelectorAll('.chapter')], links=[...document.querySelectorAll('.nav-link')];
+const done=new Set(JSON.parse(localStorage.getItem('fa_done')||'[]')); const stars=new Set(JSON.parse(localStorage.getItem('fa_stars')||'[]'));
+function progress(){const n=done.size,p=Math.round(n/chapters.length*100);document.getElementById('pct').textContent=p+'%';document.getElementById('fill').style.width=p+'%';document.getElementById('ptext').textContent=n+' de '+chapters.length+' capítulos completados';document.querySelectorAll('.done').forEach(b=>b.classList.toggle('on',done.has(b.dataset.id)));document.querySelectorAll('.star').forEach(b=>{const on=stars.has(b.dataset.id);b.classList.toggle('on',on);b.textContent=on?'★':'☆';});}
+document.addEventListener('click',e=>{const c=e.target.closest('.copy');if(c){const t=c.closest('.code').querySelector('code').innerText;navigator.clipboard.writeText(t);c.textContent='Copiado ✓';setTimeout(()=>c.textContent='Copiar',900)}const x=e.target.closest('.copy-text');if(x){navigator.clipboard.writeText(x.dataset.copy);x.textContent='Copiado ✓';setTimeout(()=>x.textContent='Copiar',900)}});
+document.querySelectorAll('.done').forEach(b=>b.onclick=()=>{done.has(b.dataset.id)?done.delete(b.dataset.id):done.add(b.dataset.id);localStorage.setItem('fa_done',JSON.stringify([...done]));progress()});document.querySelectorAll('.star').forEach(b=>b.onclick=()=>{stars.has(b.dataset.id)?stars.delete(b.dataset.id):stars.add(b.dataset.id);localStorage.setItem('fa_stars',JSON.stringify([...stars]));progress()});document.querySelectorAll('.task').forEach(b=>b.onclick=()=>{b.classList.toggle('on');b.textContent=b.classList.contains('on')?'✓ Realizada':'○ Pendiente'});
+const q=document.getElementById('search');function filter(){const v=q.value.trim().toLowerCase();chapters.forEach(c=>c.classList.toggle('hide',!!v&&!c.dataset.search.includes(v)));links.forEach(a=>{const c=document.getElementById(a.dataset.target);a.style.display=c.classList.contains('hide')?'none':'flex'})}q.oninput=filter;document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();q.focus()}});document.getElementById('clear').onclick=()=>{q.value='';filter();q.focus()};
+if(localStorage.getItem('fa_theme')==='light')document.documentElement.classList.add('light');document.getElementById('theme').onclick=()=>{document.documentElement.classList.toggle('light');localStorage.setItem('fa_theme',document.documentElement.classList.contains('light')?'light':'dark')};document.getElementById('menu').onclick=()=>document.getElementById('sidebar').classList.toggle('open');links.forEach(a=>a.onclick=()=>document.getElementById('sidebar').classList.remove('open'));
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle('active',a.dataset.target===e.target.id))}),{rootMargin:'-35% 0px -60% 0px'});chapters.forEach(c=>obs.observe(c));progress();
+</script></body></html>
